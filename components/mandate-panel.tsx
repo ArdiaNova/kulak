@@ -76,6 +76,7 @@ export function MandatePanel({
   return (
     <Card
       title="Spending mandate"
+      hint="The owner's rules. Stored in Postgres, checked by lib/guard.ts on every order, invisible to the model."
       action={
         <div className="flex items-center gap-2">
           <Chip tone={state.mandate.mode}>{state.mandate.mode}</Chip>

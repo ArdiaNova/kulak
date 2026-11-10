@@ -107,6 +107,7 @@ export function GuardPreview({ state }: { state: StateResponse }) {
   return (
     <Card
       title="Mandate what-if"
+      hint="The same pure guard, run in your browser on a real order. Changes saved vs draft, never saves."
       action={<span className="text-xs text-neutral-500">runs the real guard</span>}
     >
       {!selected || !verdicts ? (

@@ -17,7 +17,10 @@ export function ActionBar({
   onReset: () => void;
 }) {
   return (
-    <Card title="Demo controls">
+    <Card
+      title="Demo controls"
+      hint="The agent, a normal sales day, a hostile agent, and a full reset of the seeded café."
+    >
       <div className="flex flex-wrap items-center gap-2 p-4">
         <Button variant="primary" busy={busy.agent} onClick={onRun}>
           Run agent

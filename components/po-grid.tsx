@@ -78,12 +78,13 @@ export function POGrid({
   return (
     <Card
       title="Purchase orders"
+      hint="What the agent drafted, what the guard decided, and what PayPal did with it."
       action={<span className="text-xs text-neutral-500">Click a row for details</span>}
     >
       {pos.length === 0 ? (
         <Empty>No purchase orders yet. Run the agent to draft the first one.</Empty>
       ) : (
-        <div className="h-[380px] w-full p-1">
+        <div className="h-[320px] w-full p-1">
           <AgGridReact<StatePO>
             theme={GRID_THEME}
             modules={GRID_MODULES}

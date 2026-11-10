@@ -4,11 +4,13 @@ import type { ReactNode } from "react";
 
 export function Card({
   title,
+  hint,
   action,
   children,
   className = "",
 }: {
   title?: string;
+  hint?: string;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
@@ -18,9 +20,14 @@ export function Card({
       className={`rounded-xl border border-neutral-200 bg-white shadow-sm ${className}`}
     >
       {(title || action) && (
-        <header className="flex items-center justify-between gap-3 border-b border-neutral-100 px-4 py-3">
-          <h2 className="text-sm font-semibold tracking-tight text-neutral-900">{title}</h2>
-          {action}
+        <header className="border-b border-neutral-100 px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold tracking-tight text-neutral-900">{title}</h2>
+            {action}
+          </div>
+          {hint && (
+            <p className="mt-0.5 text-[11px] leading-relaxed text-neutral-500">{hint}</p>
+          )}
         </header>
       )}
       {children}

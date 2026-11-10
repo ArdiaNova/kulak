@@ -55,6 +55,7 @@ export function InventoryGrid({ items }: { items: StateItem[] }) {
   return (
     <Card
       title="Inventory"
+      hint="What the café has, when to reorder, and how many days each item lasts at the current burn."
       action={
         <span className="text-xs text-neutral-500">
           {items.length} items · {low} below reorder point

@@ -77,7 +77,10 @@ export function describe(event: StateEvent): string {
 
 export function AuditTimeline({ events, now }: { events: StateEvent[]; now: number }) {
   return (
-    <Card title="Audit timeline" action={<span className="text-xs text-neutral-500">newest first</span>}>
+    <Card
+      title="Audit timeline"
+      hint="Every agent, guard, human, PayPal and system action, newest first."
+    >
       {events.length === 0 ? (
         <Empty>No activity yet.</Empty>
       ) : (
