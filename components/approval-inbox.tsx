@@ -39,7 +39,7 @@ export function ApprovalInbox({
                       {shortId(po.id)}
                     </span>
                   </p>
-                  <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-neutral-600">
+                  <p className="mt-0.5 line-clamp-2 break-words text-xs leading-relaxed text-neutral-600">
                     {po.rationale ?? "No rationale given."}
                   </p>
                 </div>

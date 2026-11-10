@@ -1,7 +1,15 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { EnvError, readEnv } from "@/lib/env";
+import {
+  EnvError,
+  llmSchema,
+  paypalSchema,
+  readEnv,
+  supabaseSchema,
+} from "@/lib/env";
 
 const schema = z.object({
   API_URL: z.url(),
@@ -44,5 +52,24 @@ describe("readEnv", () => {
         API_KEY: "x".repeat(20),
       }),
     ).toThrow(EnvError);
+  });
+});
+
+describe(".env.example", () => {
+  it("documents exactly the variables lib/env.ts validates", () => {
+    const file = readFileSync(new URL("../.env.example", import.meta.url), "utf8");
+    const documented = file
+      .split("\n")
+      .map((line) => line.match(/^([A-Z][A-Z0-9_]*)=/)?.[1])
+      .filter((name): name is string => Boolean(name))
+      .sort();
+
+    const expected = [
+      ...Object.keys(supabaseSchema.shape),
+      ...Object.keys(paypalSchema.shape),
+      ...Object.keys(llmSchema.shape),
+    ].sort();
+
+    expect(documented).toEqual(expected);
   });
 });

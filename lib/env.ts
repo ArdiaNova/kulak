@@ -7,12 +7,12 @@ import { z } from "zod";
  * Errors list the offending variable NAME only. Never echo the value.
  */
 
-const supabaseSchema = z.object({
+export const supabaseSchema = z.object({
   SUPABASE_URL: z.url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
 });
 
-const paypalSchema = z.object({
+export const paypalSchema = z.object({
   PAYPAL_CLIENT_ID: z.string().min(1),
   PAYPAL_CLIENT_SECRET: z.string().min(1),
   PAYPAL_API_BASE: z.url().default("https://api-m.sandbox.paypal.com"),
@@ -21,7 +21,7 @@ const paypalSchema = z.object({
   SUPPLIER_PAYOUT_EMAIL: z.email(),
 });
 
-const llmSchema = z.object({
+export const llmSchema = z.object({
   LLM_BASE_URL: z.url(),
   LLM_API_KEY: z.string().min(1),
   LLM_MODEL: z.string().min(1),

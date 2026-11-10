@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { buildGuardInput } from "@/lib/executor.shared";
 import { evaluatePO } from "@/lib/guard";
@@ -63,21 +63,20 @@ export function GuardPreview({ state }: { state: StateResponse }) {
     () => [...state.pos].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [state.pos],
   );
-  const [poId, setPoId] = useState(
-    () => pos.find((po) => po.status === "pending_approval")?.id ?? pos[0]?.id ?? null,
-  );
-  const [caps, setCaps] = useState<Caps>(() => toCaps(state.mandate));
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Caps | null>(null);
 
-  useEffect(() => {
-    setCaps(toCaps(state.mandate));
-  }, [state.mandate]);
+  // No effects here on purpose: the selection follows the newest relevant PO
+  // until the owner picks one, and an untouched slider set follows the saved
+  // mandate. Reset drops the draft, so polling cannot fight the user.
+  const selectedId =
+    pickedId && pos.some((po) => po.id === pickedId)
+      ? pickedId
+      : (pos.find((po) => po.status === "pending_approval")?.id ?? pos[0]?.id ?? null);
 
-  useEffect(() => {
-    if (!pos.some((po) => po.id === poId)) setPoId(pos[0]?.id ?? null);
-  }, [pos, poId]);
-
+  const caps = draft ?? toCaps(state.mandate);
   const supplierName = (id: string) => state.suppliers.find((s) => s.id === id)?.name ?? id;
-  const selected = pos.find((po) => po.id === poId) ?? null;
+  const selected = pos.find((po) => po.id === selectedId) ?? null;
 
   const verdicts = useMemo(() => {
     if (!selected) return null;
@@ -120,7 +119,7 @@ export function GuardPreview({ state }: { state: StateResponse }) {
             </span>
             <select
               value={selected.id}
-              onChange={(event) => setPoId(event.target.value)}
+              onChange={(event) => setPickedId(event.target.value)}
               className="mt-1 w-full rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-sm text-neutral-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             >
               {pos.map((po) => (
@@ -148,7 +147,7 @@ export function GuardPreview({ state }: { state: StateResponse }) {
                   step={slider.step}
                   value={caps[slider.key]}
                   onChange={(event) =>
-                    setCaps((current) => ({ ...current, [slider.key]: Number(event.target.value) }))
+                    setDraft({ ...caps, [slider.key]: Number(event.target.value) })
                   }
                   className="mt-1 w-full accent-blue-600"
                 />
@@ -192,7 +191,7 @@ export function GuardPreview({ state }: { state: StateResponse }) {
             <p className="text-[11px] text-neutral-500">
               Nothing is saved and no money moves. Change the real rules above.
             </p>
-            <Button variant="ghost" onClick={() => setCaps(toCaps(state.mandate))}>
+            <Button variant="ghost" onClick={() => setDraft(null)}>
               Reset
             </Button>
           </div>

@@ -211,7 +211,7 @@ describe("syncPayout", () => {
   }
 
   it("applies SUCCESS once and then leaves a paid order alone", async () => {
-    const { repo, executor, po } = await paidOrder();
+    const { executor, po } = await paidOrder();
 
     const first = await executor.syncPayout(po.id);
     expect(first).toMatchObject({ status: "paid", applied: true });

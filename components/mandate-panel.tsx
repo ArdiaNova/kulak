@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button, Card, Chip } from "@/components/ui";
 import { money } from "@/components/types";
@@ -42,12 +42,11 @@ export function MandatePanel({
   onSaved: () => Promise<void>;
   onError: (message: string) => void;
 }) {
-  const [draft, setDraft] = useState<Draft>(toDraft(state.mandate));
+  // Null means "show what is saved", so a poll can never clobber an edit and a
+  // successful save clears the draft instead of copying values around.
+  const [edited, setEdited] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    setDraft(toDraft(state.mandate));
-  }, [state.mandate]);
+  const draft = edited ?? toDraft(state.mandate);
 
   async function save(patch: Record<string, unknown>) {
     setBusy(true);
@@ -64,6 +63,7 @@ export function MandatePanel({
         throw new Error(body?.error?.message ?? "Could not save the mandate.");
       }
       await onSaved();
+      setEdited(null);
     } catch (error) {
       onError(error instanceof Error ? error.message : "Could not save the mandate.");
     } finally {
@@ -139,7 +139,7 @@ export function MandatePanel({
                 step={field.step}
                 inputMode="decimal"
                 onChange={(event) =>
-                  setDraft((current) => ({ ...current, [field.key]: event.target.value }))
+                  setEdited({ ...draft, [field.key]: event.target.value })
                 }
                 className="mt-1 w-full rounded-lg border border-neutral-200 px-2.5 py-1.5 text-sm tabular-nums text-neutral-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />

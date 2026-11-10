@@ -13,7 +13,7 @@ import { Kpis } from "@/components/kpis";
 import { MandatePanel } from "@/components/mandate-panel";
 import { PODrawer, type POAction } from "@/components/po-drawer";
 import { POGrid } from "@/components/po-grid";
-import { money, relativeTime } from "@/components/types";
+import { money } from "@/components/types";
 import { Button, Card, Chip, Skeleton } from "@/components/ui";
 import { useDashboard } from "@/components/use-dashboard";
 
@@ -69,7 +69,13 @@ export function Dashboard() {
             </span>
             {state && (
               <span className="hidden text-[11px] text-neutral-400 sm:inline">
-                updated {relativeTime(state.now, Date.now())}
+                updated{" "}
+                {new Date(state.now).toLocaleTimeString("en-US", {
+                  hour12: false,
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
               </span>
             )}
           </div>
@@ -131,7 +137,7 @@ export function Dashboard() {
                 />
                 <GuardPreview state={state} />
               </div>
-              <AuditTimeline events={state.events} now={Date.now()} />
+              <AuditTimeline events={state.events} now={Date.parse(state.now)} />
             </div>
 
             <p className="pb-4 text-center text-[11px] text-neutral-400">

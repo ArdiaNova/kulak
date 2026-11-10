@@ -116,7 +116,7 @@ export function PODrawer({
           {po.rationale && (
             <div>
               <p className="text-[11px] uppercase tracking-wide text-neutral-400">Why</p>
-              <p className="mt-1 leading-relaxed text-neutral-700">{po.rationale}</p>
+              <p className="mt-1 break-words leading-relaxed text-neutral-700">{po.rationale}</p>
             </div>
           )}
 

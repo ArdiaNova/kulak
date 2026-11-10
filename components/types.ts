@@ -41,12 +41,6 @@ export type AgentTraceEntry = {
   result: unknown;
 };
 
-export type AgentRunResponse = {
-  trace: AgentTraceEntry[];
-  summary: string;
-  purchaseOrders: { id: string; status: string; total: number }[];
-};
-
 export const money = (value: number): string =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 

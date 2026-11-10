@@ -240,10 +240,6 @@ const HANDLERS: Record<string, (raw: unknown, ctx: ToolContext) => Promise<ToolO
     }),
 };
 
-export function toolNames(): string[] {
-  return Object.keys(HANDLERS);
-}
-
 export async function executeTool(
   name: string,
   rawArgs: unknown,

@@ -39,7 +39,3 @@ export function weekSpent(pos: PurchaseOrder[], now: Date): number {
     .reduce((sum, po) => sum + po.total, 0);
   return round2(total);
 }
-
-export function isOpenPO(status: POStatus): boolean {
-  return OPEN_PO_STATUSES.includes(status);
-}

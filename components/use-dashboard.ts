@@ -47,6 +47,9 @@ export function useDashboard() {
   }, []);
 
   useEffect(() => {
+    // First load. refresh() only sets state after the fetch resolves, so this
+    // is not the synchronous cascading render the rule warns about.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh(false);
   }, [refresh]);
 
