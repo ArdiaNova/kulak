@@ -43,3 +43,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# private recording plan (kept on this machine, not published)
+/docs/demo-video-script.md

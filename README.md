@@ -162,10 +162,14 @@ npm run build       # production build, no secrets required
 CI runs typecheck, test and build on every push to `main` and on pull requests
 (`.github/workflows/ci.yml`).
 
-### 8. Demo script
+### 8. Demo flow
 
-[`docs/demo-video-script.md`](docs/demo-video-script.md) is the 2:55 recording plan: pre-flight
-checklist, shot list with timestamps, full transcript, recovery table.
+The 2:55 demonstration, in order (the recording script is kept privately, out of this repo):
+reset the demo and switch the mandate to **auto** → **Run agent** and watch the trace stream at
+the bottom of the page → two orders are paid through Payouts while the bean order is escalated
+→ approve the bean order by hand → **Simulate rogue agent** and watch the guard deny it →
+mark a paid order **delivered** and see stock refill → drag the **what-if** sliders. The
+**New order** card is the owner's manual override and uses the same guard and payout path.
 
 ## Limitations (honest list)
 
