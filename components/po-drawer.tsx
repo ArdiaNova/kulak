@@ -2,6 +2,9 @@
 
 import { useEffect } from "react";
 
+import type { Supplier, SupplierQuote } from "@/lib/types";
+
+import { POLines } from "@/components/po-lines";
 import { money, shortId, type StateItem, type StatePO } from "@/components/types";
 import { Button, Chip, statusLabel } from "@/components/ui";
 
@@ -16,6 +19,8 @@ const DECISION_TONE: Record<string, string> = { approve: "ok", escalate: "low", 
 export function PODrawer({
   po,
   items,
+  quotes,
+  suppliers,
   supplierName,
   busyAction,
   onAction,
@@ -23,6 +28,8 @@ export function PODrawer({
 }: {
   po: StatePO;
   items: StateItem[];
+  quotes: SupplierQuote[];
+  suppliers: Supplier[];
   supplierName: string;
   busyAction: POAction | null;
   onAction: (action: POAction) => void;
@@ -37,8 +44,6 @@ export function PODrawer({
   }, [onClose]);
 
   const lines = po.lines ?? [];
-  const nameOf = (itemId: string) =>
-    items.find((item) => item.id === itemId)?.name ?? itemId;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -119,19 +124,15 @@ export function PODrawer({
             <p className="text-[11px] uppercase tracking-wide text-neutral-400">
               Lines ({lines.length})
             </p>
-            <ul className="mt-1 divide-y divide-neutral-100 rounded-lg border border-neutral-200">
-              {lines.map((line, index) => (
-                <li key={line.id ?? index} className="flex items-start justify-between gap-3 px-3 py-2">
-                  <div>
-                    <p className="text-neutral-900">{nameOf(line.itemId)}</p>
-                    <p className="text-xs tabular-nums text-neutral-500">
-                      {line.qty} × {money(line.unitPrice)}
-                    </p>
-                  </div>
-                  <p className="tabular-nums text-neutral-900">{money(line.qty * line.unitPrice)}</p>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-1">
+              <POLines
+                lines={lines}
+                items={items}
+                quotes={quotes}
+                suppliers={suppliers}
+                supplierId={po.supplierId}
+              />
+            </div>
           </div>
 
           <div>

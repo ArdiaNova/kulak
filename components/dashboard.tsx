@@ -6,6 +6,8 @@ import { ActionBar } from "@/components/action-bar";
 import { AgentTrace } from "@/components/agent-trace";
 import { ApprovalInbox } from "@/components/approval-inbox";
 import { AuditTimeline } from "@/components/audit-timeline";
+import { Forecast } from "@/components/forecast";
+import { GuardPreview } from "@/components/guard-preview";
 import { InventoryGrid } from "@/components/inventory-grid";
 import { Kpis } from "@/components/kpis";
 import { MandatePanel } from "@/components/mandate-panel";
@@ -89,6 +91,7 @@ export function Dashboard() {
         {state && (
           <>
             <Kpis state={state} />
+            <Forecast state={state} />
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
               <div className="space-y-4 xl:col-span-2">
@@ -120,11 +123,14 @@ export function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-              <MandatePanel
-                state={state}
-                onSaved={reload}
-                onError={(message) => setToast({ kind: "error", message })}
-              />
+              <div className="space-y-4">
+                <MandatePanel
+                  state={state}
+                  onSaved={reload}
+                  onError={(message) => setToast({ kind: "error", message })}
+                />
+                <GuardPreview state={state} />
+              </div>
               <AuditTimeline events={state.events} now={Date.now()} />
             </div>
 
@@ -141,6 +147,8 @@ export function Dashboard() {
         <PODrawer
           po={selected}
           items={state.items}
+          quotes={state.quotes}
+          suppliers={state.suppliers}
           supplierName={supplierNames[selected.supplierId] ?? selected.supplierId}
           busyAction={busyAction}
           onAction={(action) => poAction(selected.id, action)}

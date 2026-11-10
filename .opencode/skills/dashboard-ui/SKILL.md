@@ -17,8 +17,11 @@ Judges score Design as "a complete, coherent product experience". Spend real eff
 7. **Audit timeline:** newest first. Icon + colour per actor (agent, guard, human, paypal, system), short text, relative time.
 8. **Agent trace:** collapsible panel after "Run agent": each tool call with a one-line summary, then the agent's final summary.
 9. **Action bar:** Run agent · Simulate sales · Simulate rogue agent · Reset demo. Confirm before Reset.
+10. **Mandate what-if:** sliders that re-run the real `lib/guard.ts` in the browser on a real PO (saved vs draft caps side by side). Saves nothing, moves no money.
+11. **Cash-out forecast strip:** money waiting in the inbox, projected week spend vs budget, next item to run out.
 
 ## Behaviour
+- The agent trace is streamed from `POST /api/agent/stream` (SSE): `round`, `tool`, `done`, `error` events, typed in `lib/agent.types.ts` and parsed in `components/api.ts`. `POST /api/agent/run` stays as the non-streaming API.
 - Load via GET /api/state. Poll every 3 s while any PO is `paying`, otherwise every 15 s.
 - Per-button loading state. Disable while running. Show errors in a toast with the server message.
 - Empty states and a first-load skeleton. No raw JSON in the UI.
