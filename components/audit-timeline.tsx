@@ -1,7 +1,7 @@
 "use client";
 
 import { money, relativeTime, shortId, type StateEvent } from "@/components/types";
-import { Card, Empty } from "@/components/ui";
+import { Card } from "@/components/ui";
 
 const ACTOR: Record<string, { letter: string; className: string }> = {
   agent: { letter: "A", className: "bg-blue-100 text-blue-700" },
@@ -80,11 +80,16 @@ export function AuditTimeline({ events, now }: { events: StateEvent[]; now: numb
     <Card
       title="Audit timeline"
       hint="Every agent, guard, human, PayPal and system action, newest first."
+      className="flex flex-col xl:h-full"
     >
       {events.length === 0 ? (
-        <Empty>No activity yet.</Empty>
+        <div className="flex flex-1 items-center justify-center px-4 py-10 text-center text-sm text-neutral-500">
+          No activity yet.
+        </div>
       ) : (
-        <ol className="max-h-[520px] overflow-y-auto px-4 py-3">
+        // On a wide screen the timeline takes the height of the mandate column
+        // next to it, so the two cards end level; the list scrolls inside.
+        <ol className="max-h-[520px] min-h-0 overflow-y-auto px-4 py-3 xl:max-h-none xl:flex-1">
           {events.map((event, index) => {
             const actor = ACTOR[event.actor] ?? ACTOR.system;
             return (
