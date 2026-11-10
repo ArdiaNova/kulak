@@ -111,7 +111,7 @@ export function Dashboard() {
             <Forecast state={state} />
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-              <div className="space-y-4 xl:col-span-2">
+              <div className="flex flex-col gap-4 xl:col-span-2">
                 <InventoryGrid items={state.items} />
                 <POGrid pos={state.pos} supplierNames={supplierNames} onSelect={setSelectedId} />
               </div>

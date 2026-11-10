@@ -5,7 +5,7 @@ import { AgGridReact } from "ag-grid-react";
 
 import { DEFAULT_COL_DEF, GRID_MODULES, GRID_OPTIONS, GRID_THEME } from "@/components/grid-config";
 import { money, relativeTime, shortId, type StatePO } from "@/components/types";
-import { Card, Chip, Empty, statusLabel } from "@/components/ui";
+import { Card, Chip, statusLabel } from "@/components/ui";
 
 const DECISION_TONE: Record<string, string> = {
   approve: "ok",
@@ -80,11 +80,14 @@ export function POGrid({
       title="Purchase orders"
       hint="What the agent drafted, what the guard decided, and what PayPal did with it."
       action={<span className="text-xs text-neutral-500">Click a row for details</span>}
+      className="flex flex-col xl:min-h-0 xl:flex-1"
     >
       {pos.length === 0 ? (
-        <Empty>No purchase orders yet. Run the agent to draft the first one.</Empty>
+        <div className="flex flex-1 items-center justify-center px-4 py-10 text-center text-sm text-neutral-500">
+          No purchase orders yet. Run the agent to draft the first one.
+        </div>
       ) : (
-        <div className="h-[320px] w-full p-1">
+        <div className="h-[320px] w-full p-1 xl:h-auto xl:min-h-[260px] xl:flex-1">
           <AgGridReact<StatePO>
             theme={GRID_THEME}
             modules={GRID_MODULES}

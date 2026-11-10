@@ -5,7 +5,7 @@ import { AgGridReact } from "ag-grid-react";
 
 import { DEFAULT_COL_DEF, GRID_MODULES, GRID_OPTIONS, GRID_THEME } from "@/components/grid-config";
 import { num, stockStatus, type StateItem } from "@/components/types";
-import { Card, Chip, Empty } from "@/components/ui";
+import { Card, Chip } from "@/components/ui";
 
 function StatusCell({ data }: ICellRendererParams<StateItem>) {
   if (!data) return null;
@@ -61,11 +61,14 @@ export function InventoryGrid({ items }: { items: StateItem[] }) {
           {items.length} items · {low} below reorder point
         </span>
       }
+      className="flex flex-col xl:min-h-0 xl:flex-1"
     >
       {items.length === 0 ? (
-        <Empty>No items yet. Run the simulator reset to seed the café.</Empty>
+        <div className="flex flex-1 items-center justify-center px-4 py-10 text-center text-sm text-neutral-500">
+          No items yet. Run the simulator reset to seed the café.
+        </div>
       ) : (
-        <div className="h-[320px] w-full p-1">
+        <div className="h-[320px] w-full p-1 xl:h-auto xl:min-h-[260px] xl:flex-1">
           <AgGridReact<StateItem>
             theme={GRID_THEME}
             modules={GRID_MODULES}

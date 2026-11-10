@@ -30,7 +30,7 @@ Judges score Design as "a complete, coherent product experience". Spend real eff
 - "Mark delivered" on `paid` POs.
 
 ## AG Grid
-Check the installed `ag-grid-community` / `ag-grid-react` version and read its docs or types. Recent versions require registering modules (e.g. `ModuleRegistry.registerModules([AllCommunityModule])`) and use the Theming API instead of the old CSS imports. Do not copy setup code from memory. Master/detail is an Enterprise feature, so use the drawer instead. Grids must have an explicit height.
+Check the installed `ag-grid-community` / `ag-grid-react` version and read its docs or types. Recent versions require registering modules (e.g. `ModuleRegistry.registerModules([AllCommunityModule])`) and use the Theming API instead of the old CSS imports. Do not copy setup code from memory. Master/detail is an Enterprise feature, so use the drawer instead. Grids must have an explicit height: on wide screens the grid wrapper is `xl:flex-1` with an `xl:min-h` so both table cards stretch to the sidebar height (inventory + purchase orders bottoms line up with the approval inbox); below xl they stay at a fixed 320 px.
 
 ## Visual direction
 Clean light theme, generous spacing, one accent colour, tabular numbers for money, consistent status-chip colours (paid green, paying blue, pending amber, denied/failed red, delivered grey). System font stack is fine. English copy. Desktop first (1280 px), nothing broken at 1024 px.
