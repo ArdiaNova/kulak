@@ -137,7 +137,12 @@ export function buildGuardInput(args: {
     supplier: { id: supplier.id, approved: supplier.approved },
     quotes: quoteMap,
     items: new Map(items.map((item) => [item.id, { avgDailyUse: item.avgDailyUse }])),
-    weekSpent: weekSpent(pos, now),
+    // The order being evaluated must not count twice: once in the weekly spend
+    // and once as the order total.
+    weekSpent: weekSpent(
+      pos.filter((candidate) => candidate.id !== po.id),
+      now,
+    ),
     openPOs: pos
       .filter((candidate) => candidate.id !== po.id)
       .map((candidate) => ({

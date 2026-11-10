@@ -299,3 +299,37 @@ describe("markDelivered", () => {
     await expect(executor.markDelivered(po.id)).rejects.toMatchObject({ code: "INVALID_STATE" });
   });
 });
+
+describe("buildGuardInput", () => {
+  it("does not count the evaluated order twice in the weekly spend", async () => {
+    const { repo, executor } = await setup({ mode: "auto" });
+    const first = await draft(repo, { qty: 20 }); // 23.00
+    await executor.submitPO(first.id); // paid automatically
+    const second = await draft(repo, { qty: 10 }); // 11.50
+    await executor.submitPO(second.id);
+
+    const [suppliers, quotes, items, pos, mandate, stored] = await Promise.all([
+      repo.listSuppliers(),
+      repo.listQuotes(),
+      repo.listItems(),
+      repo.listPOs(),
+      repo.getMandate(),
+      repo.getPO(second.id),
+    ]);
+    if (!stored) throw new Error("missing order");
+
+    const { buildGuardInput } = await import("@/lib/executor.shared");
+    const input = buildGuardInput({
+      po: stored,
+      mandate,
+      suppliers,
+      quotes,
+      items,
+      pos,
+      now: clock(),
+    });
+
+    // Only the first order counts; the second one is the order under review.
+    expect(input.weekSpent).toBe(23);
+  });
+});
