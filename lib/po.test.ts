@@ -55,6 +55,23 @@ describe("createPO", () => {
     });
   });
 
+  it("records an owner-placed order as a human action", async () => {
+    const { repo } = setup();
+
+    const po = await createPO(repo, {
+      ...base,
+      createdBy: "human",
+      lines: [{ itemId: MILK, qty: 20 }],
+    });
+    const events = await repo.listEvents(10);
+
+    expect(po.createdBy).toBe("human");
+    expect(events.find((event) => event.type === "po_created")).toMatchObject({
+      actor: "human",
+      poId: po.id,
+    });
+  });
+
   it("rejects an item the supplier does not quote", async () => {
     const { repo } = setup();
 

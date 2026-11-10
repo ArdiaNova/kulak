@@ -11,6 +11,7 @@ import { GuardPreview } from "@/components/guard-preview";
 import { InventoryGrid } from "@/components/inventory-grid";
 import { Kpis } from "@/components/kpis";
 import { MandatePanel } from "@/components/mandate-panel";
+import { NewOrder } from "@/components/new-order";
 import { PODrawer, type POAction } from "@/components/po-drawer";
 import { POGrid } from "@/components/po-grid";
 import { money } from "@/components/types";
@@ -34,6 +35,7 @@ export function Dashboard() {
     runAgent,
     simulateSales,
     simulateRogue,
+    placeOrder,
     resetDemo,
     poAction,
   } = useDashboard();
@@ -122,6 +124,7 @@ export function Dashboard() {
                   onRogue={simulateRogue}
                   onReset={resetDemo}
                 />
+                <NewOrder state={state} busy={Boolean(busy.order)} onPlace={placeOrder} />
                 <ApprovalInbox
                   pos={pending}
                   supplierNames={supplierNames}

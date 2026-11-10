@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { messageFrom, send, streamAgent } from "@/components/api";
 import type { POAction } from "@/components/po-drawer";
-import type { AgentTraceEntry, StateResponse } from "@/components/types";
+import { money, type AgentTraceEntry, type StateResponse } from "@/components/types";
 
 export type Toast = { kind: "ok" | "error"; message: string };
 
@@ -111,6 +111,26 @@ export function useDashboard() {
     [perform],
   );
 
+  const placeOrder = useCallback(
+    (input: { supplierId: string; itemId: string; qty: number }) =>
+      perform("order", "New order", async () => {
+        const body = (await send("/api/pos", input)) as {
+          status?: string;
+          total?: number;
+        } | null;
+        const label: Record<string, string> = {
+          paid: "paid with PayPal",
+          paying: "paying — the webhook will confirm it",
+          pending_approval: "waiting in your inbox, above the auto-approve cap",
+          denied: "denied by the guard",
+          payment_failed: "payment failed",
+        };
+        const status = body?.status ?? "unknown";
+        return `Order ${money(body?.total ?? 0)} → ${label[status] ?? status}.`;
+      }),
+    [perform],
+  );
+
   const simulateSales = useCallback(
     (itemId?: string) =>
       perform("sales", "Sales", async () => {
@@ -183,6 +203,7 @@ export function useDashboard() {
     runAgent,
     simulateSales,
     simulateRogue,
+    placeOrder,
     resetDemo,
     poAction,
   };

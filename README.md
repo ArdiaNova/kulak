@@ -59,6 +59,16 @@ audit timeline on the dashboard.
 - `POST /api/agent/stream` streams each round and tool call over SSE so the dashboard shows
   the agent working instead of a spinner for 15 seconds.
 
+## Owner override (manual order)
+
+The AI is not the only buyer. **New order** in the dashboard lets the owner buy something the
+agent did not suggest — a booking on Friday, an item the model thinks is fine. It is the same
+path as an agent order: `POST /api/pos` → `lib/po.ts` prices the line from `supplier_quotes` →
+`executor.submitPO` → `lib/guard.ts` decides. A human placing the order counts as the approval,
+so in manual mode an order the guard approves is paid without a second click; anything over
+the auto-approve cap still waits in the inbox, and the hard cap, an unapproved supplier or an
+odd price still denies it. The agent never sees the form and cannot use it.
+
 ## How PayPal is used
 
 - `lib/paypal.ts` is a small REST wrapper around Payouts: OAuth token, `POST /v1/payments/payouts`,
@@ -171,6 +181,8 @@ checklist, shot list with timestamps, full transcript, recovery table.
   Zod-validated responses.
 - **No auth.** The dashboard has no login: it is a demo, and the mutation routes are meant to
   be public for judging. Add auth before pointing it at a real café.
+- **Owner orders are one line at a time.** New order buys a single item from one supplier; a
+  multi-line manual basket is not built yet.
 - **Weekly spend** is a rolling 7-day sum of orders that reached `approved` or later; it is not
   a ledger and does not net out refunds.
 

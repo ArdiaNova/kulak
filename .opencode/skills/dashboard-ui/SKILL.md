@@ -19,6 +19,7 @@ Judges score Design as "a complete, coherent product experience". Spend real eff
 9. **Action bar:** Run agent · Simulate sales (with an item selector, random by default) · Simulate rogue agent · Reset demo. Confirm before Reset.
 10. **Mandate what-if:** sliders that re-run the real `lib/guard.ts` in the browser on a real PO (saved vs draft caps side by side). Saves nothing, moves no money.
 11. **Cash-out forecast strip:** money waiting in the inbox, projected week spend vs budget, next item to run out.
+12. **New order (owner override):** item + supplier + qty for a purchase the agent did not suggest. `POST /api/pos` prices it from `supplier_quotes` and sends it through the same guard and executor; a human order counts as the approval, so in manual mode an approved order pays without a second click, anything over the auto-approve cap waits in the inbox, and deny still denies.
 
 ## Behaviour
 - The agent trace is streamed from `POST /api/agent/stream` (SSE): `round`, `tool`, `done`, `error` events, typed in `lib/agent.types.ts` and parsed in `components/api.ts`. `POST /api/agent/run` stays as the non-streaming API.
