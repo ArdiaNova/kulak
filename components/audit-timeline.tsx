@@ -80,7 +80,7 @@ export function AuditTimeline({ events, now }: { events: StateEvent[]; now: numb
     <Card
       title="Audit timeline"
       hint="Every agent, guard, human, PayPal and system action, newest first."
-      className="flex flex-col xl:h-full"
+      className="flex h-full flex-col"
     >
       {events.length === 0 ? (
         <div className="flex flex-1 items-center justify-center px-4 py-10 text-center text-sm text-neutral-500">

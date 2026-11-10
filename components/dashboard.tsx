@@ -131,7 +131,14 @@ export function Dashboard() {
                 />
                 <GuardPreview state={state} />
               </div>
-              <AuditTimeline events={state.events} now={Date.parse(state.now)} />
+              <div className="relative xl:min-h-0">
+                {/* Absolutely positioned on wide screens so a long audit trail
+                    can never stretch the row past the mandate column: it ends
+                    level with that column and the extra events scroll. */}
+                <div className="xl:absolute xl:inset-0">
+                  <AuditTimeline events={state.events} now={Date.parse(state.now)} />
+                </div>
+              </div>
             </div>
 
             {/* Last on the page on purpose: a streaming run scrolls inside this
