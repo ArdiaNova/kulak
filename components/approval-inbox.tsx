@@ -1,7 +1,7 @@
 "use client";
 
 import { money, shortId, type StatePO } from "@/components/types";
-import { Button, Card, Chip, Empty } from "@/components/ui";
+import { Button, Card, Chip } from "@/components/ui";
 
 /**
  * The only place a human can release money. Each card shows the guard's written
@@ -24,12 +24,18 @@ export function ApprovalInbox({
     <Card
       title="Approval inbox"
       hint="Orders the mandate escalated to you. Approve to pay with PayPal, or reject."
+      className="flex min-h-0 flex-1 flex-col"
       action={<span className="text-xs text-neutral-500">{pos.length} waiting</span>}
     >
       {pos.length === 0 ? (
-        <Empty>Nothing waiting for you. Run the agent to draft new orders.</Empty>
+        <div className="flex flex-1 items-center justify-center px-4 py-10 text-center text-sm text-neutral-500">
+          Nothing waiting for you. Run the agent to draft new orders.
+        </div>
       ) : (
-        <ul className="divide-y divide-neutral-100">
+        // The card fills the sidebar next to the tables, so the two columns end
+        // level. Orders are never clipped: only a list longer than the card
+        // scrolls.
+        <ul className="min-h-0 flex-1 divide-y divide-neutral-100 overflow-y-auto">
           {pos.map((po) => (
             <li key={po.id} className="space-y-2 px-4 py-3">
               <div className="flex items-start justify-between gap-3">

@@ -104,7 +104,7 @@ export function Dashboard() {
                 <InventoryGrid items={state.items} />
                 <POGrid pos={state.pos} supplierNames={supplierNames} onSelect={setSelectedId} />
               </div>
-              <div className="space-y-4">
+              <div className="flex flex-col gap-4">
                 <ActionBar
                   busy={busy}
                   onRun={runAgent}
