@@ -70,20 +70,13 @@ function trim(payload: unknown): unknown {
     event_type?: unknown;
     resource?: Record<string, unknown>;
   };
-  const resource = event.resource ?? {};
-  const item = resource.payout_item as Record<string, unknown> | undefined;
-  return {
-    id: event.id,
-    event_type: event.event_type,
-    resource: {
-      payout_item_id: resource.payout_item_id,
-      payout_batch_id: resource.payout_batch_id,
-      transaction_status: resource.transaction_status,
-      payout_item: item
-        ? { sender_item_id: item.sender_item_id, amount: item.amount, receiver: item.receiver }
-        : undefined,
-    },
-  };
+  // Keep every real resource key (batch events carry only payout_batch_id, item
+  // events carry payout_item) and drop just the bulky `links` array.
+  const resource: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(event.resource ?? {})) {
+    if (key !== "links") resource[key] = value;
+  }
+  return { id: event.id, event_type: event.event_type, resource };
 }
 
 export async function handleWebhook(

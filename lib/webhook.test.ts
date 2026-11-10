@@ -173,7 +173,15 @@ describe("handleWebhook", () => {
     expect(outcome).toMatchObject({ status: 200, body: { action: "batch_logged" } });
     expect(getItem).not.toHaveBeenCalled();
     expect(state.pos[0].status).toBe("paying");
-    expect((await repo.listEvents(100)).map((event) => event.type)).toContain("webhook_received");
+    const events = await repo.listEvents(100);
+    const logged = events.find((event) => event.type === "webhook_received");
+    expect(logged?.detail).toMatchObject({
+      eventType: "PAYMENT.PAYOUTSBATCH.PROCESSING",
+      payload: {
+        event_type: "PAYMENT.PAYOUTSBATCH.PROCESSING",
+        resource: { payout_batch_id: "BATCH-1" },
+      },
+    });
   });
 
   it("asks PayPal to retry when the item lookup fails", async () => {
