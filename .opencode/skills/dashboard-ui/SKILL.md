@@ -13,10 +13,10 @@ Judges score Design as "a complete, coherent product experience". Spend real eff
 3. **Mandate panel:** mode toggle, weekly budget, auto-approve cap, hard cap, max qty multiple, max price spike %. Saves with PATCH /api/mandate. Explain each field in one short line.
 4. **Inventory grid (AG Grid):** SKU, name, stock, reorder point, days left (colour-coded), status chip (OK / Low / Critical).
 5. **Purchase orders grid (AG Grid):** created, supplier, total, status chip, guard decision, created by. Row click opens a side drawer with lines, rationale, every guard reason, payout batch id, and action buttons.
-6. **Approval inbox:** cards for `pending_approval` POs: supplier, total, rationale, reasons in plain words, Approve / Reject.
+6. **Approval inbox:** cards for `pending_approval` POs: supplier, total, rationale, reasons in plain words, Approve / Reject. Reject opens a short optional note (max 280 chars) that is stored on the `po_rejected` event and shown in the audit trail and the drawer.
 7. **Audit timeline:** newest first. Icon + colour per actor (agent, guard, human, paypal, system), short text, relative time.
 8. **Agent trace:** full-width panel at the bottom of the page, after the audit row. Collapsible: each tool call with a one-line summary, then the agent's final summary. Fixed 340 px height with internal scroll (auto-scrolls to the newest step while running, returns to the summary when the run ends), so a streaming run never pushes other cards around.
-9. **Action bar:** Run agent · Simulate sales · Simulate rogue agent · Reset demo. Confirm before Reset.
+9. **Action bar:** Run agent · Simulate sales (with an item selector, random by default) · Simulate rogue agent · Reset demo. Confirm before Reset.
 10. **Mandate what-if:** sliders that re-run the real `lib/guard.ts` in the browser on a real PO (saved vs draft caps side by side). Saves nothing, moves no money.
 11. **Cash-out forecast strip:** money waiting in the inbox, projected week spend vs budget, next item to run out.
 

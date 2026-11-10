@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+
+import { RejectNote } from "@/components/reject-note";
 import { money, shortId, type StatePO } from "@/components/types";
 import { Button, Card, Chip } from "@/components/ui";
 
@@ -17,9 +20,11 @@ export function ApprovalInbox({
   pos: StatePO[];
   supplierNames: Record<string, string>;
   busy: (id: string, action: "approve" | "reject") => boolean;
-  onAction: (id: string, action: "approve" | "reject") => void;
+  onAction: (id: string, action: "approve" | "reject", reason?: string) => void;
   onOpen: (id: string) => void;
 }) {
+  const [rejecting, setRejecting] = useState<string | null>(null);
+
   return (
     <Card
       title="Approval inbox"
@@ -77,13 +82,28 @@ export function ApprovalInbox({
                 >
                   Approve &amp; pay
                 </Button>
-                <Button variant="danger" busy={busy(po.id, "reject")} onClick={() => onAction(po.id, "reject")}>
+                <Button
+                  variant="danger"
+                  busy={busy(po.id, "reject")}
+                  onClick={() => setRejecting(po.id)}
+                >
                   Reject
                 </Button>
                 <Button variant="ghost" onClick={() => onOpen(po.id)}>
                   Details
                 </Button>
               </div>
+
+              {rejecting === po.id && (
+                <RejectNote
+                  busy={busy(po.id, "reject")}
+                  onCancel={() => setRejecting(null)}
+                  onConfirm={(reason) => {
+                    setRejecting(null);
+                    onAction(po.id, "reject", reason);
+                  }}
+                />
+              )}
             </li>
           ))}
         </ul>

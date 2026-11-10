@@ -46,6 +46,15 @@ export function Dashboard() {
   );
 
   const selected = state?.pos.find((po) => po.id === selectedId) ?? null;
+  // The note the owner typed when rejecting this order, if there was one.
+  const rejectReason = (() => {
+    if (!selected || !state) return null;
+    const event = state.events.find(
+      (candidate) => candidate.type === "po_rejected" && candidate.poId === selected.id,
+    );
+    const note = event?.detail.reason;
+    return typeof note === "string" && note.trim().length > 0 ? note : null;
+  })();
   const pending = (state?.pos ?? []).filter((po) => po.status === "pending_approval");
   const busyAction = selected
     ? (ACTIONS.find((action) => busy[`po:${selected.id}:${action}`]) ?? null)
@@ -106,6 +115,7 @@ export function Dashboard() {
               </div>
               <div className="flex flex-col gap-4">
                 <ActionBar
+                  items={state.items}
                   busy={busy}
                   onRun={runAgent}
                   onSales={simulateSales}
@@ -166,8 +176,9 @@ export function Dashboard() {
           quotes={state.quotes}
           suppliers={state.suppliers}
           supplierName={supplierNames[selected.supplierId] ?? selected.supplierId}
+          rejectReason={rejectReason}
           busyAction={busyAction}
-          onAction={(action) => poAction(selected.id, action)}
+          onAction={(action, reason) => poAction(selected.id, action, reason)}
           onClose={() => setSelectedId(null)}
         />
       )}

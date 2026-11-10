@@ -200,6 +200,32 @@ describe("rejectPO", () => {
     await expect(executor.approvePO(po.id)).rejects.toMatchObject({ code: "INVALID_STATE" });
     expect(paypal.calls).toHaveLength(0);
   });
+
+  it("stores the owner's rejection note on the event", async () => {
+    const { state, repo, executor } = await setup();
+    const po = await draft(repo, { qty: 20 });
+    await executor.submitPO(po.id);
+
+    await executor.rejectPO(po.id, "  supplier sold out  ");
+
+    const event = state.events.find(
+      (candidate) => candidate.type === "po_rejected" && candidate.poId === po.id,
+    );
+    expect(event).toMatchObject({ actor: "human", detail: { reason: "supplier sold out" } });
+  });
+
+  it("still allows a rejection with no note", async () => {
+    const { state, repo, executor } = await setup();
+    const po = await draft(repo, { qty: 20 });
+    await executor.submitPO(po.id);
+
+    await executor.rejectPO(po.id);
+
+    const event = state.events.find(
+      (candidate) => candidate.type === "po_rejected" && candidate.poId === po.id,
+    );
+    expect(event?.detail).toEqual({});
+  });
 });
 
 describe("syncPayout", () => {

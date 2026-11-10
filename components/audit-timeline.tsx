@@ -37,8 +37,10 @@ export function describe(event: StateEvent): string {
       return `${po} approved by the owner`;
     case "po_approve_blocked":
       return `${po} approval blocked: the guard says deny`;
-    case "po_rejected":
-      return `${po} rejected by the owner`;
+    case "po_rejected": {
+      const why = str(d.reason);
+      return why ? `${po} rejected by the owner — “${why}”` : `${po} rejected by the owner`;
+    }
     case "po_delivered":
       return `${po} delivered, stock refilled`;
     case "payout_started":

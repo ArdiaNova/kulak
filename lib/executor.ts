@@ -154,7 +154,7 @@ export function createExecutor(deps: ExecutorDeps) {
     };
   }
 
-  async function rejectPO(poId: string): Promise<ActionResult> {
+  async function rejectPO(poId: string, reason?: string): Promise<ActionResult> {
     const moved = await deps.repo.updatePOStatus(poId, "pending_approval", "rejected");
     if (!moved) {
       const po = await mustGetPO(deps.repo, poId);
@@ -164,11 +164,12 @@ export function createExecutor(deps: ExecutorDeps) {
       );
     }
 
+    const note = reason?.trim();
     await deps.repo.insertEvent({
       actor: "human",
       type: "po_rejected",
       poId,
-      detail: {},
+      detail: note ? { reason: note } : {},
     });
     return { poId, status: "rejected", decision: null, reasons: [] };
   }

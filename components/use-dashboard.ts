@@ -112,9 +112,9 @@ export function useDashboard() {
   );
 
   const simulateSales = useCallback(
-    () =>
+    (itemId?: string) =>
       perform("sales", "Sales", async () => {
-        const body = (await send("/api/sim/sales")) as {
+        const body = (await send("/api/sim/sales", itemId ? { itemId } : undefined)) as {
           name?: string;
           sold?: number;
           stock?: number;
@@ -152,9 +152,12 @@ export function useDashboard() {
   );
 
   const poAction = useCallback(
-    (id: string, action: POAction) =>
+    (id: string, action: POAction, reason?: string) =>
       perform(`po:${id}:${action}`, `PO ${action}`, async () => {
-        const body = (await send(`/api/pos/${id}/${action}`)) as { status?: string } | null;
+        const body = (await send(
+          `/api/pos/${id}/${action}`,
+          action === "reject" ? { reason: reason ?? "" } : undefined,
+        )) as { status?: string } | null;
         const labels: Record<POAction, string> = {
           approve: "Approved and sent to PayPal",
           reject: "Rejected",

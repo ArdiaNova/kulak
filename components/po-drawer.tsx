@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import type { Supplier, SupplierQuote } from "@/lib/types";
 
 import { POLines } from "@/components/po-lines";
+import { RejectNote } from "@/components/reject-note";
 import { money, shortId, type StateItem, type StatePO } from "@/components/types";
 import { Button, Chip, statusLabel } from "@/components/ui";
 
@@ -22,6 +23,7 @@ export function PODrawer({
   quotes,
   suppliers,
   supplierName,
+  rejectReason,
   busyAction,
   onAction,
   onClose,
@@ -31,8 +33,9 @@ export function PODrawer({
   quotes: SupplierQuote[];
   suppliers: Supplier[];
   supplierName: string;
+  rejectReason?: string | null;
   busyAction: POAction | null;
-  onAction: (action: POAction) => void;
+  onAction: (action: POAction, reason?: string) => void;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -43,6 +46,7 @@ export function PODrawer({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  const [rejecting, setRejecting] = useState(false);
   const lines = po.lines ?? [];
 
   return (
@@ -160,38 +164,70 @@ export function PODrawer({
               </ul>
             )}
           </div>
+
+          {po.status === "rejected" && rejectReason && (
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-neutral-400">
+                Why it was rejected
+              </p>
+              <p className="mt-1 break-words rounded-lg border border-red-200 bg-red-50/50 px-3 py-2 text-xs leading-relaxed text-red-800">
+                “{rejectReason}”
+              </p>
+            </div>
+          )}
         </div>
 
-        <footer className="flex items-center justify-end gap-2 border-t border-neutral-100 px-5 py-3">
-          {po.status === "pending_approval" && (
+        <footer className="flex flex-wrap items-center justify-end gap-2 border-t border-neutral-100 px-5 py-3">
+          {rejecting ? (
+            <RejectNote
+              busy={busyAction === "reject"}
+              onCancel={() => setRejecting(false)}
+              onConfirm={(reason) => {
+                setRejecting(false);
+                onAction("reject", reason);
+              }}
+            />
+          ) : (
             <>
-              <Button
-                variant="danger"
-                busy={busyAction === "reject"}
-                onClick={() => onAction("reject")}
-              >
-                Reject
-              </Button>
-              <Button variant="primary" busy={busyAction === "approve"} onClick={() => onAction("approve")}>
-                Approve &amp; pay
-              </Button>
+              {po.status === "pending_approval" && (
+                <>
+                  <Button
+                    variant="danger"
+                    busy={busyAction === "reject"}
+                    onClick={() => setRejecting(true)}
+                  >
+                    Reject
+                  </Button>
+                  <Button
+                    variant="primary"
+                    busy={busyAction === "approve"}
+                    onClick={() => onAction("approve")}
+                  >
+                    Approve &amp; pay
+                  </Button>
+                </>
+              )}
+              {po.status === "paying" && (
+                <Button busy={busyAction === "sync"} onClick={() => onAction("sync")}>
+                  Sync with PayPal
+                </Button>
+              )}
+              {po.status === "paid" && (
+                <Button
+                  variant="primary"
+                  busy={busyAction === "deliver"}
+                  onClick={() => onAction("deliver")}
+                >
+                  Mark delivered
+                </Button>
+              )}
+              {(po.status === "delivered" ||
+                po.status === "denied" ||
+                po.status === "rejected" ||
+                po.status === "payment_failed") && (
+                <p className="text-xs text-neutral-500">No further action.</p>
+              )}
             </>
-          )}
-          {po.status === "paying" && (
-            <Button busy={busyAction === "sync"} onClick={() => onAction("sync")}>
-              Sync with PayPal
-            </Button>
-          )}
-          {po.status === "paid" && (
-            <Button variant="primary" busy={busyAction === "deliver"} onClick={() => onAction("deliver")}>
-              Mark delivered
-            </Button>
-          )}
-          {(po.status === "delivered" ||
-            po.status === "denied" ||
-            po.status === "rejected" ||
-            po.status === "payment_failed") && (
-            <p className="text-xs text-neutral-500">No further action.</p>
           )}
         </footer>
       </aside>
