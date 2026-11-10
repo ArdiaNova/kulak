@@ -104,7 +104,7 @@ export function Dashboard() {
                 <InventoryGrid items={state.items} />
                 <POGrid pos={state.pos} supplierNames={supplierNames} onSelect={setSelectedId} />
               </div>
-              <div className="flex flex-col gap-4">
+              <div className="space-y-4">
                 <ActionBar
                   busy={busy}
                   onRun={runAgent}
@@ -118,12 +118,6 @@ export function Dashboard() {
                   busy={(id, action) => Boolean(busy[`po:${id}:${action}`])}
                   onAction={poAction}
                   onOpen={setSelectedId}
-                />
-                <AgentTrace
-                  trace={trace}
-                  summary={summary}
-                  running={Boolean(busy.agent)}
-                  round={round}
                 />
               </div>
             </div>
@@ -139,6 +133,15 @@ export function Dashboard() {
               </div>
               <AuditTimeline events={state.events} now={Date.parse(state.now)} />
             </div>
+
+            {/* Last on the page on purpose: a streaming run scrolls inside this
+                panel and can never push the cards above it around. */}
+            <AgentTrace
+              trace={trace}
+              summary={summary}
+              running={Boolean(busy.agent)}
+              round={round}
+            />
 
             <p className="pb-4 text-center text-[11px] text-neutral-400">
               Money moves only after <code className="rounded bg-neutral-200/60 px-1">lib/guard.ts</code>{" "}

@@ -15,9 +15,9 @@ function compact(value: unknown, limit = 90): string {
  * steps come from our loop, so the product can be audited without trusting the
  * prose.
  *
- * The panel scrolls inside itself instead of growing: a run streams 10+ tool
- * calls, and a growing card would shove every card below it down the page
- * mid-demo. On a wide screen it takes the height the left column leaves.
+ * The panel has a fixed height and scrolls inside itself: a run streams 10+ tool
+ * calls, and it is placed last on the page so no card below it can be pushed
+ * around while the model works.
  */
 export function AgentTrace({
   trace,
@@ -48,7 +48,6 @@ export function AgentTrace({
     <Card
       title="Agent trace"
       hint="The model's real tool calls, streamed live. The summary is its own words."
-      className="flex flex-col xl:min-h-[280px] xl:flex-1"
       action={
         <span className="text-xs text-neutral-500">
           {running
@@ -57,10 +56,7 @@ export function AgentTrace({
         </span>
       }
     >
-      <div
-        ref={scroller}
-        className="h-[300px] overflow-y-auto xl:h-auto xl:min-h-0 xl:flex-1"
-      >
+      <div ref={scroller} className="h-[340px] overflow-y-auto">
         {untouched ? (
           <div className="flex h-full items-center justify-center p-4 text-center text-sm text-neutral-500">
             No run yet in this session. Press “Run agent” to see its steps.

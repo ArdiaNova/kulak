@@ -15,7 +15,7 @@ Judges score Design as "a complete, coherent product experience". Spend real eff
 5. **Purchase orders grid (AG Grid):** created, supplier, total, status chip, guard decision, created by. Row click opens a side drawer with lines, rationale, every guard reason, payout batch id, and action buttons.
 6. **Approval inbox:** cards for `pending_approval` POs: supplier, total, rationale, reasons in plain words, Approve / Reject.
 7. **Audit timeline:** newest first. Icon + colour per actor (agent, guard, human, paypal, system), short text, relative time.
-8. **Agent trace:** collapsible panel after "Run agent": each tool call with a one-line summary, then the agent's final summary. It scrolls inside a bounded panel (fixed height on narrow screens, fills the sidebar on wide ones) so a running agent never pushes the cards below it down the page; it auto-scrolls to the newest step while running and jumps back to the summary when the run ends.
+8. **Agent trace:** full-width panel at the bottom of the page, after the audit row. Collapsible: each tool call with a one-line summary, then the agent's final summary. Fixed 340 px height with internal scroll (auto-scrolls to the newest step while running, returns to the summary when the run ends), so a streaming run never pushes other cards around.
 9. **Action bar:** Run agent · Simulate sales · Simulate rogue agent · Reset demo. Confirm before Reset.
 10. **Mandate what-if:** sliders that re-run the real `lib/guard.ts` in the browser on a real PO (saved vs draft caps side by side). Saves nothing, moves no money.
 11. **Cash-out forecast strip:** money waiting in the inbox, projected week spend vs budget, next item to run out.

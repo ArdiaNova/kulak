@@ -29,7 +29,7 @@ export function ApprovalInbox({
       {pos.length === 0 ? (
         <Empty>Nothing waiting for you. Run the agent to draft new orders.</Empty>
       ) : (
-        <ul className="max-h-[320px] divide-y divide-neutral-100 overflow-y-auto">
+        <ul className="divide-y divide-neutral-100">
           {pos.map((po) => (
             <li key={po.id} className="space-y-2 px-4 py-3">
               <div className="flex items-start justify-between gap-3">
