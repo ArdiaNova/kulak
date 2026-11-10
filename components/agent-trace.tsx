@@ -19,10 +19,12 @@ export function AgentTrace({
   trace,
   summary,
   running,
+  round,
 }: {
   trace: AgentTraceEntry[];
   summary: string | null;
   running: boolean;
+  round: number;
 }) {
   const totalMs = trace.reduce((sum, entry) => sum + entry.durationMs, 0);
   const [open, setOpen] = useState(true);
@@ -32,7 +34,9 @@ export function AgentTrace({
       title="Agent trace"
       action={
         <span className="text-xs text-neutral-500">
-          {running ? "running…" : `${trace.length} tool calls · ${(totalMs / 1000).toFixed(1)}s`}
+          {running
+            ? `round ${Math.max(round, 1)} · ${trace.length} calls`
+            : `${trace.length} tool calls · ${(totalMs / 1000).toFixed(1)}s`}
         </span>
       }
     >
@@ -40,7 +44,8 @@ export function AgentTrace({
         {running && (
           <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700">
             <span className="size-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-            The model is planning, reading stock and talking to suppliers…
+            Round {Math.max(round, 1)}: the model is planning, reading stock and talking to
+            suppliers…
           </div>
         )}
 

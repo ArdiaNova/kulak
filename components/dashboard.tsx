@@ -27,6 +27,7 @@ export function Dashboard() {
     busy,
     trace,
     summary,
+    round,
     reload,
     runAgent,
     simulateSales,
@@ -109,7 +110,12 @@ export function Dashboard() {
                   onAction={poAction}
                   onOpen={setSelectedId}
                 />
-                <AgentTrace trace={trace} summary={summary} running={Boolean(busy.agent)} />
+                <AgentTrace
+                  trace={trace}
+                  summary={summary}
+                  running={Boolean(busy.agent)}
+                  round={round}
+                />
               </div>
             </div>
 

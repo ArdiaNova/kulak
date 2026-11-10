@@ -69,6 +69,17 @@ export type AgentResult = {
   purchaseOrders: AgentPurchaseOrder[];
 };
 
+/** Server-sent events for the live trace: one per model round and tool call. */
+export type AgentStreamEvent =
+  | { type: "round"; iteration: number }
+  | { type: "tool"; entry: TraceEntry }
+  | { type: "done"; result: AgentResult };
+
+export type AgentRunOptions = {
+  /** Called as the loop progresses. Must not throw; the route drops failures. */
+  onEvent?: (event: AgentStreamEvent) => void;
+};
+
 export type AgentDeps = {
   repo: Repo;
   executor: Executor;

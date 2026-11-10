@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { MAX_ITERATIONS, runAgent } from "@/lib/agent";
-import type { ChatMessage, ModelReply } from "@/lib/agent.types";
+import type { AgentStreamEvent, ChatMessage, ModelReply } from "@/lib/agent.types";
 import { createExecutor, type PayoutClient } from "@/lib/executor";
 import { createFakeRepo, BAD, BEANS, GOOD, MILK } from "@/lib/fake-repo";
 import { SYSTEM_PROMPT } from "@/lib/prompts";
@@ -232,5 +232,33 @@ describe("runAgent", () => {
     expect(result.trace[0].ok).toBe(false);
     expect(result.trace[0].result).toMatchObject({ error: expect.stringContaining("Invalid arguments") });
     expect(result.summary).toBe("I could not create that order.");
+  });
+
+  it("streams rounds and tool calls before the final result", async () => {
+    const { repo, executor } = setup();
+    const { model } = scripted([
+      () => call("get_inventory", {}, "c1"),
+      () => text("Stock looks fine."),
+    ]);
+    const events: AgentStreamEvent[] = [];
+
+    const result = await runAgent(
+      { repo, executor, model, clock },
+      { onEvent: (event) => events.push(event) },
+    );
+
+    expect(events[0]).toEqual({ type: "round", iteration: 0 });
+    const toolIndex = events.findIndex((event) => event.type === "tool");
+    const doneIndex = events.findIndex((event) => event.type === "done");
+    expect(toolIndex).toBeGreaterThan(-1);
+    expect(doneIndex).toBeGreaterThan(toolIndex);
+    expect(events[toolIndex]).toMatchObject({
+      type: "tool",
+      entry: { tool: "get_inventory", ok: true, step: 1 },
+    });
+    expect(events[doneIndex]).toMatchObject({
+      type: "done",
+      result: { trace: result.trace, summary: "Stock looks fine." },
+    });
   });
 });

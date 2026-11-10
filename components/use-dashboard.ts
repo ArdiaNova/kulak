@@ -25,6 +25,58 @@ async function send(path: string, body?: unknown): Promise<unknown> {
   return response.json().catch(() => null);
 }
 
+type StreamEvent =
+  | { type: "round"; iteration: number }
+  | { type: "tool"; entry: AgentTraceEntry }
+  | { type: "done"; result: AgentRunBody }
+  | { type: "error"; message: string };
+
+type AgentRunBody = {
+  trace: AgentTraceEntry[];
+  summary: string;
+  purchaseOrders: unknown[];
+};
+
+/** Read the server-sent events from POST /api/agent/stream as they arrive. */
+async function streamAgent(onEvent: (event: StreamEvent) => void): Promise<AgentRunBody> {
+  const response = await fetch("/api/agent/stream", { method: "POST", cache: "no-store" });
+  if (!response.ok || !response.body) throw new Error(await messageFrom(response));
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let finished: AgentRunBody | null = null;
+  let failure: string | null = null;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const blocks = buffer.split("\n\n");
+    buffer = blocks.pop() ?? "";
+
+    for (const block of blocks) {
+      const line = block.split("\n").find((candidate) => candidate.startsWith("data:"));
+      if (!line) continue;
+      let event: StreamEvent;
+      try {
+        event = JSON.parse(line.slice(5).trim()) as StreamEvent;
+      } catch {
+        continue;
+      }
+      if (event.type === "error") {
+        failure = event.message;
+        continue;
+      }
+      if (event.type === "done") finished = event.result;
+      onEvent(event);
+    }
+  }
+
+  if (!finished) throw new Error(failure ?? "The agent stream ended before the run finished.");
+  return finished;
+}
+
 /**
  * One owner of dashboard state: load, poll, act, refresh. Polls every 3 s while
  * a payout is in flight, every 15 s otherwise (skill dashboard-ui).
@@ -36,6 +88,7 @@ export function useDashboard() {
   const [toast, setToast] = useState<Toast | null>(null);
   const [busy, setBusy] = useState<Record<string, boolean>>({});
   const [run, setRun] = useState<{ trace: AgentTraceEntry[]; summary: string } | null>(null);
+  const [round, setRound] = useState(0);
   const [tick, setTick] = useState(0);
   const mounted = useRef(true);
 
@@ -104,15 +157,22 @@ export function useDashboard() {
   const runAgent = useCallback(
     () =>
       perform("agent", "Agent run", async () => {
-        const body = (await send("/api/agent/run")) as {
-          trace?: AgentTraceEntry[];
-          summary?: string;
-          purchaseOrders?: unknown[];
-        };
-        if (body.trace) {
-          setRun({ trace: body.trace, summary: body.summary ?? "" });
-        }
-        return `Agent finished: ${body.purchaseOrders?.length ?? 0} purchase orders.`;
+        setRun({ trace: [], summary: "" });
+        setRound(0);
+        // Each tool call lands in the panel while the model is still working.
+        const result = await streamAgent((event) => {
+          if (event.type === "round") {
+            setRound(event.iteration + 1);
+            return;
+          }
+          if (event.type !== "tool") return;
+          setRun((current) => ({
+            trace: [...(current?.trace ?? []), event.entry],
+            summary: current?.summary ?? "",
+          }));
+        });
+        setRun({ trace: result.trace, summary: result.summary });
+        return `Agent finished: ${result.purchaseOrders.length} purchase orders.`;
       }),
     [perform],
   );
@@ -181,6 +241,7 @@ export function useDashboard() {
     busy,
     trace: run?.trace ?? [],
     summary: run?.summary ?? null,
+    round,
     reload: () => refresh(false),
     runAgent,
     simulateSales,

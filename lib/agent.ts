@@ -5,6 +5,7 @@ import {
   type AgentDeps,
   type AgentPurchaseOrder,
   type AgentResult,
+  type AgentRunOptions,
   type ChatMessage,
   type ModelReply,
   type ToolOutcome,
@@ -63,8 +64,12 @@ function tooMany(): never {
   throw new AgentError("EMPTY_REPLY", "The model returned no tool calls and no summary twice.");
 }
 
-export async function runAgent(deps: AgentDeps): Promise<AgentResult> {
+export async function runAgent(
+  deps: AgentDeps,
+  options: AgentRunOptions = {},
+): Promise<AgentResult> {
   const clock = deps.clock ?? (() => new Date());
+  const emit = options.onEvent ?? (() => {});
   const messages: ChatMessage[] = [
     { role: "system", content: SYSTEM_PROMPT },
     { role: "user", content: USER_PROMPT },
@@ -72,16 +77,22 @@ export async function runAgent(deps: AgentDeps): Promise<AgentResult> {
 
   await deps.repo.insertEvent({ actor: "agent", type: "agent_run_started", detail: {} });
 
+  let iterations = 0;
+  /** One place that calls the model, so the live trace sees every round. */
+  const complete = (): Promise<ModelReply> => {
+    emit({ type: "round", iteration: iterations });
+    return deps.model.complete(messages, TOOL_SCHEMAS);
+  };
+
   // Rule: retry once if the first answer has neither tool calls nor a summary.
-  let reply: ModelReply = await deps.model.complete(messages, TOOL_SCHEMAS);
+  let reply: ModelReply = await complete();
   if (reply.toolCalls.length === 0 && !(reply.content ?? "").trim()) {
-    reply = await deps.model.complete(messages, TOOL_SCHEMAS);
+    reply = await complete();
     if (reply.toolCalls.length === 0 && !(reply.content ?? "").trim()) tooMany();
   }
 
   const trace: TraceEntry[] = [];
   const poIds: string[] = [];
-  let iterations = 0;
   let stopped: "summary" | "iteration_limit" = "summary";
   let budgetNoted = false;
   let nudged = false;
@@ -95,7 +106,7 @@ export async function runAgent(deps: AgentDeps): Promise<AgentResult> {
         iterations += 1;
         messages.push({ role: "assistant", content: reply.content });
         messages.push({ role: "user", content: draftNote(drafts) });
-        reply = await deps.model.complete(messages, TOOL_SCHEMAS);
+        reply = await complete();
         continue;
       }
       break;
@@ -144,6 +155,7 @@ export async function runAgent(deps: AgentDeps): Promise<AgentResult> {
         type: "tool_call",
         detail: { ...entry },
       });
+      emit({ type: "tool", entry });
 
       messages.push({
         role: "tool",
@@ -163,7 +175,7 @@ export async function runAgent(deps: AgentDeps): Promise<AgentResult> {
       budgetNoted = true;
     }
 
-    reply = await deps.model.complete(messages, TOOL_SCHEMAS);
+    reply = await complete();
   }
 
   const purchaseOrders: AgentPurchaseOrder[] = [];
@@ -201,5 +213,7 @@ export async function runAgent(deps: AgentDeps): Promise<AgentResult> {
     },
   });
 
-  return { trace, summary, purchaseOrders };
+  const result: AgentResult = { trace, summary, purchaseOrders };
+  emit({ type: "done", result });
+  return result;
 }
