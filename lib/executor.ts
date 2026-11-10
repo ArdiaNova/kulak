@@ -19,7 +19,7 @@ export type { ActionResult, ExecutorDeps, PayoutClient } from "@/lib/executor.sh
  */
 export function createExecutor(deps: ExecutorDeps) {
   const clock = deps.clock ?? (() => new Date());
-  const { pay, syncPayout } = createPayoutSteps(deps);
+  const { pay, syncPayout, applyPayoutEvent } = createPayoutSteps(deps);
 
   async function runGuard(po: PurchaseOrder): Promise<{ guard: GuardResult; mandate: Mandate }> {
     const [mandate, suppliers, quotes, items, pos] = await Promise.all([
@@ -199,7 +199,7 @@ export function createExecutor(deps: ExecutorDeps) {
     return { poId, status: "delivered", decision: null, reasons: [] };
   }
 
-  return { submitPO, approvePO, rejectPO, markDelivered, syncPayout };
+  return { submitPO, approvePO, rejectPO, markDelivered, syncPayout, applyPayoutEvent };
 }
 
 export type Executor = ReturnType<typeof createExecutor>;

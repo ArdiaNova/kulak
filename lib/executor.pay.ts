@@ -62,8 +62,7 @@ export function createPayoutSteps(deps: ExecutorDeps) {
     }
   }
 
-  async function syncPayout(poId: string): Promise<ActionResult> {
-    const po = await mustGetPO(deps.repo, poId);
+  async function syncPayout(poId: string): Promise<ActionResult> {    const po = await mustGetPO(deps.repo, poId);
     if (!po.payoutBatchId) {
       throw new ExecutorError("NO_PAYOUT", "This order has no payout batch yet.");
     }
@@ -104,5 +103,49 @@ export function createPayoutSteps(deps: ExecutorDeps) {
     return { poId, status: target, decision: null, reasons: [], applied: moved };
   }
 
-  return { pay, syncPayout };
+  /**
+   * Apply a webhook's verdict to the order it belongs to. Idempotent: a replay,
+   * or an order that already sits in the target status, changes nothing.
+   */
+  async function applyPayoutEvent(input: {
+    poId: string;
+    target: "paid" | "payment_failed" | null;
+    detail: Record<string, unknown>;
+  }): Promise<{ poId: string; status: POStatus; changed: boolean }> {
+    const po = await mustGetPO(deps.repo, input.poId);
+
+    if (!input.target) {
+      await deps.repo.insertEvent({
+        actor: "paypal",
+        type: "payout_event",
+        poId: po.id,
+        detail: { ...input.detail, applied: null },
+      });
+      return { poId: po.id, status: po.status, changed: false };
+    }
+
+    // Same status already: nothing to do, but keep the audit trail.
+    if (po.status === input.target) {
+      await deps.repo.insertEvent({
+        actor: "paypal",
+        type: "payout_event",
+        poId: po.id,
+        detail: { ...input.detail, applied: null, duplicate: true },
+      });
+      return { poId: po.id, status: po.status, changed: false };
+    }
+
+    // Only an in-flight payout can be settled; otherwise the event is logged only.
+    const moved = await deps.repo.updatePOStatus(po.id, "paying", input.target);
+    await deps.repo.insertEvent({
+      actor: "paypal",
+      type: "payout_event",
+      poId: po.id,
+      detail: { ...input.detail, from: po.status, to: input.target, applied: moved },
+    });
+
+    return { poId: po.id, status: moved ? input.target : po.status, changed: moved };
+  }
+
+  return { pay, syncPayout, applyPayoutEvent };
 }
